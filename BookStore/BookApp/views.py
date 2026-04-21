@@ -1,7 +1,10 @@
 from django.shortcuts import render , redirect
-from .forms import BookForm
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import login , logout , authenticate
+from django.contrib.auth.decorators import login_required
+from .models import Book
+from .forms import BookForm
+
 # Create your views here.
 
 def Register(request):   
@@ -20,10 +23,6 @@ def Register(request):
 
     context = {"form": form}
     return render(request, "BookApp/register.html", context)
-
-
-def Home(request):
-    return render(request, "BookApp/home.html")
 
 
 def Login(request):
@@ -45,17 +44,49 @@ def Login(request):
 def Logout(request):
 
     logout(request)
-    return redirect("login")
+    return redirect("home")
+
+
+def Home(request):
+    books = Book.objects.all()
+    context = {"books":books}
+    return render(request, "BookApp/home.html" , context)
 
 
 
-   
+@login_required(login_url="login")
+def BookCreate(request):
+
+    if request.method == "POST":
+        form = BookForm(request.POST)
+        if form.is_valid():
+            book = form.save(commit=False)
+            book.author = request.user
+            book.save()
+            return redirect("home")
+
+    else:
+        form = BookForm()
+    context = {"form":form}
+    return render(request , "BookApp/book_create.html" , context )
 
 
+@login_required(login_url="login")
+def UpdateBook(request , b_id):
 
+    book = Book.objects.get(id = b_id)
+    if request.method == "POST":
+        form = BookForm(request.POST , instance=book)
+        
+        if form.is_valid():
+            book = form.save(commit=False)
+            book.author = request.user
+            book.save()
+            return redirect("home")
+    else:
+        form = BookForm(instance=book)
 
-
-
-
+    context = {"form": form , "book": book}
+    return render(request, "BookApp/book_update.html", context)
 
 

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Book - Book Store</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Arial', sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; }
+        nav { background: rgba(0,0,0,0.8); padding: 15px 30px; display:flex; justify-content:space-between; align-items:center; }
+        nav h1 { color: white; }
+        .container { max-width: 600px; margin: 50px auto; padding: 20px; }
+        .form-card { background: white; padding: 40px; border-radius: 10px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+        .form-card h2 { text-align:center; margin-bottom:20px; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display:block; margin-bottom:5px; font-weight:bold; }
+        .form-group input, .form-group textarea { width:100%; padding:10px; border:1px solid #ddd; border-radius:5px; }
+        .btn { width:100%; padding:12px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color:white; border:none; border-radius:5px; font-weight:bold; }
+        .back-link { text-align:center; margin-top:12px; }
+        .back-link a { color:#667eea; text-decoration:none; }
+    </style>
+</head>
+<body>
+    <nav>
+        <h1>📚 Book Store</h1>
+        <div></div>
+    </nav>
+    <div class="container">
+        <div class="form-card">
+            <h2>Edit Book</h2>
+            <form method="post">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="{{ form.title.id_for_label }}">Title</label>
+                    {{ form.title }}
+                </div>
+                <div class="form-group">
+                    <label for="{{ form.price.id_for_label }}">Price</label>
+                    {{ form.price }}
+                </div>
+                <div class="form-group">
+                    <label for="{{ form.description.id_for_label }}">Description</label>
+                    {{ form.description }}
+                </div>
+                <button type="submit" class="btn">Save Changes</button>
+            </form>
+            <div class="back-link"><a href="{% url 'home' %}">← Back to Home</a></div>
+        </div>
+    </div>
+</body>
+</html>
