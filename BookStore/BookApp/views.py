@@ -2,6 +2,7 @@ from django.shortcuts import render , redirect
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import login , logout , authenticate
 from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator
 from .models import Book
 from .forms import BookForm
 
@@ -48,9 +49,21 @@ def Logout(request):
 
 
 def Home(request):
+    
+    sort_list = ["price" , "-price" , "created_at" , "-created_at"]
+
+    sort = request.GET.get("sort")
+    
     books = Book.objects.all()
-    context = {"books":books}
-    return render(request, "BookApp/home.html" , context)
+
+    if sort and sort in sort_list:
+        books = books.order_by(sort)
+
+    p = Paginator(books , 6)
+    page_number = request.GET.get("page")
+    page_obj = p.get_page(page_number)
+    context = {"books": books, "page_obj": page_obj, "sort": sort}
+    return render(request, "BookApp/home.html", context)
 
 
 
@@ -60,6 +73,7 @@ def BookCreate(request):
     if request.method == "POST":
         form = BookForm(request.POST)
         if form.is_valid():
+
             book = form.save(commit=False)
             book.author = request.user
             book.save()
@@ -72,9 +86,13 @@ def BookCreate(request):
 
 
 @login_required(login_url="login")
-def UpdateBook(request , b_id):
+def BookUpdate(request , b_id):
 
     book = Book.objects.get(id = b_id)
+
+    if book.author != request.user:
+        return redirect("home")
+    
     if request.method == "POST":
         form = BookForm(request.POST , instance=book)
         
@@ -88,5 +106,20 @@ def UpdateBook(request , b_id):
 
     context = {"form": form , "book": book}
     return render(request, "BookApp/book_update.html", context)
+
+@login_required(login_url="login")
+def BookDelete(request , b_id):
+    
+    book = Book.objects.get(id = b_id)
+    
+    if book.author != request.user:
+        return redirect("home")
+
+    if request.method == "POST":
+        book.delete()
+        return redirect("home")
+    
+    context = {"book" : book}
+    return render(request , "BookApp/book_delete.html" , context)
 
 

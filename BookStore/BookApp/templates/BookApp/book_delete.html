@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Delete Book - Confirmation</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f4f6fb; padding: 40px; }
+        .card { max-width: 600px; margin: 40px auto; background: white; padding: 24px; border-radius: 8px; box-shadow: 0 6px 18px rgba(0,0,0,0.08); }
+        h2 { color: #d9534f; }
+        p { color: #444; }
+        .actions { margin-top: 20px; display:flex; gap:10px; }
+        .btn { padding: 10px 14px; border-radius: 6px; text-decoration: none; font-weight: 600; }
+        .confirm { background: #d9534f; color: white; border: none; }
+        .cancel { background: #eee; color: #333; text-decoration: none; display:inline-block; padding: 10px 14px; border-radius:6px; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h2>Confirm Delete</h2>
+        <p>Are you sure you want to delete the book "<strong>{{ book.title }}</strong>"?</p>
+        <p>This action cannot be undone.</p>
+
+        <form method="post" style="display:inline-block;">
+            {% csrf_token %}
+            <button type="submit" class="btn confirm">Yes, delete</button>
+        </form>
+        <a href="{% url 'home' %}" class="cancel">Cancel</a>
+    </div>
+</body>
+</html>

@@ -159,9 +159,47 @@
             font-weight: 600;
         }
 
+        .delete-btn {
+            padding: 8px 12px;
+            background: #ef476f;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 600;
+        }
+
         .user-info {
             color: white;
             font-size: 14px;
+        }
+
+        /* Pagination */
+        .pagination {
+            grid-column: 1 / -1;
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 20px;
+            align-items: center;
+        }
+
+        .page-link {
+            display: inline-block;
+            padding: 8px 12px;
+            background: #fff;
+            border-radius: 6px;
+            color: #333;
+            text-decoration: none;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+        }
+
+        .page-link:hover {
+            background: #f0f4ff;
+        }
+
+        .page-active {
+            background: #667eea;
+            color: white;
         }
     </style>
 </head>
@@ -194,11 +232,24 @@
                     <a href="{% url 'register' %}" class="btn btn-secondary">Sign Up</a>
                 {% endif %}
             </div>
+            
+            <!-- Sort control -->
+            <form method="get" style="margin-top:16px; display:flex; justify-content:center; gap:8px;">
+                <label style="color:#666; align-self:center;">Sort:</label>
+                <select name="sort" onchange="this.form.submit()" style="padding:8px 10px; border-radius:6px; border:1px solid #ddd;">
+                    <option value="" {% if not sort %}selected{% endif %}>Default</option>
+                    <option value="-created_at" {% if sort == '-created_at' %}selected{% endif %}>Newest</option>
+                    <option value="created_at" {% if sort == 'created_at' %}selected{% endif %}>Oldest</option>
+                    <option value="price" {% if sort == 'price' %}selected{% endif %}>Price: Low → High</option>
+                    <option value="-price" {% if sort == '-price' %}selected{% endif %}>Price: High → Low</option>
+                </select>
+                <noscript><button class="btn" type="submit">Apply</button></noscript>
+            </form>
         </div>
 
         <div class="books">
             <h2>Available Books</h2>
-            {% for book in books %}
+            {% for book in page_obj %}
                 <div class="book-card">
                     <h3>{{ book.title }}</h3>
                     <p><strong>Author:</strong> {% if book.author %}{{ book.author.username }}{% else %}Unknown{% endif %}</p>
@@ -209,12 +260,38 @@
                     {% if user.is_authenticated and book.author == user %}
                         <div class="card-actions">
                             <a href="{% url 'update-book' book.id %}" class="edit-btn">Edit Your Book</a>
+                            <a href="{% url 'delete-book' book.id %}" class="delete-btn">Remove</a>
                         </div>
                     {% endif %}
                 </div>
             {% empty %}
                 <p style="grid-column: 1 / -1; text-align: center; color: #666;">No books available yet.</p>
             {% endfor %}
+
+            <!-- Pagination controls -->
+            {% if page_obj.has_other_pages %}
+                <div class="pagination">
+                    {% if page_obj.has_previous %}
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if sort %}&sort={{ sort }}{% endif %}">« Prev</a>
+                    {% else %}
+                        <span class="page-link" style="opacity:0.5;">« Prev</span>
+                    {% endif %}
+
+                    {% for num in page_obj.paginator.page_range %}
+                        {% if num == page_obj.number %}
+                            <span class="page-link page-active">{{ num }}</span>
+                        {% else %}
+                            <a class="page-link" href="?page={{ num }}{% if sort %}&sort={{ sort }}{% endif %}">{{ num }}</a>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if page_obj.has_next %}
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if sort %}&sort={{ sort }}{% endif %}">Next »</a>
+                    {% else %}
+                        <span class="page-link" style="opacity:0.5;">Next »</span>
+                    {% endif %}
+                </div>
+            {% endif %}
         </div>
     </div>
 </body>
